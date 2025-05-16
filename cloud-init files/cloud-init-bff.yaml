@@ -15,6 +15,10 @@ write_files:
         res.send('BFF is running');
       });
 
+      app.get('/healthz', (req, res) => {
+        res.send('BFF is healthy');
+      });
+
       app.listen(port, () => console.log(`BFF running on port ${port}`));
   - path: /home/azureuser/bff-app/package.json
     content: |

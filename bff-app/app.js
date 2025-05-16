@@ -6,5 +6,8 @@ app.get('/', (req, res) => {
   res.send('BFF is running');
 });
 
+app.get('/healthz', (req, res) => {
+  res.send('BFF is healthy');
+});
+
 app.listen(port, () => console.log(`BFF running on port ${port}`));
-m
