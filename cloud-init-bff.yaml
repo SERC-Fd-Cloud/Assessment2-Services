@@ -5,48 +5,14 @@ packages:
   - npm
 
 write_files:
-  - path: /home/azureuser/bff-app/.env
-    content: |
-      BLOB_CONNECTION_STRING=${BLOB_CONNECTION_STRING}
-      DB_CONNECTION_STRING=mysql://appuser:yourpassword@${DB_IP}/appdb
-      PORT=3000
   - path: /home/azureuser/bff-app/app.js
     content: |
       const express = require('express');
-      const multer = require('multer');
-      const { BlobServiceClient } = require('@azure/storage-blob');
-      const mysql = require('mysql2/promise');
-      require('dotenv').config();
       const app = express();
       const port = process.env.PORT || 3000;
-      const upload = multer({ storage: multer.memoryStorage() });
-
-      const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.BLOB_CONNECTION_STRING);
-
-      let db;
-      (async () => {
-      db = await mysql.createConnection(process.env.DB_CONNECTION_STRING);
-      })();
 
       app.get('/', (req, res) => {
-      res.json({ message: 'BFF is running' });
-      });
-
-      app.post('/upload', upload.single('file'), async (req, res) => {
-      const file = req.file;
-      try {
-        // Upload to Blob Storage
-        const containerClient = blobServiceClient.getContainerClient('uploads');
-        const blockBlobClient = containerClient.getBlockBlobClient(file.originalname);
-        await blockBlobClient.uploadData(file.buffer);
-
-        // Example DB operation
-        await db.execute('INSERT INTO uploads(filename) VALUES(?)', [file.originalname]);
-
-        res.send('File processed and saved!');
-      } catch (err) {
-        res.status(500).send('Processing error');
-      }
+        res.send('BFF is running');
       });
 
       app.listen(port, () => console.log(`BFF running on port ${port}`));
@@ -57,17 +23,11 @@ write_files:
         "version": "1.0.0",
         "main": "app.js",
         "dependencies": {
-          "express": "^4.18.2",
-          "multer": "^1.4.5",
-          "@azure/storage-blob": "^12.15.0",
-          "dotenv": "^16.0.3",
-          "pg": "^8.11.1"
+          "express": "^4.18.2"
         }
       }
 
 runcmd:
-  - export BLOB_CONNECTION_STRING=<set your blob connection string>
-  - export DB_IP=<set your database IP address>
   - mkdir -p /home/azureuser/bff-app
   - cd /home/azureuser/bff-app
   - npm install
