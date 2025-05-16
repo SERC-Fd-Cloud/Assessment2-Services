@@ -8,7 +8,9 @@ write_files:
   - path: /home/azureuser/bff-app/app.js
     content: |
       const express = require('express');
+      const mysql = require('mysql2/promise');
       const app = express();
+      DB_CONNECTION_STRING=mysql://appuser:yourpassword@${DB_IP}/appdb
       const port = process.env.PORT || 3000;
 
       app.get('/', (req, res) => {
@@ -16,7 +18,18 @@ write_files:
       });
 
       app.get('/healthz', (req, res) => {
-        res.send('BFF is healthy');
+        let dbStatus = 'unreachable';
+        mysql.createConnection(DB_CONNECTION_STRING)
+          .then(connection => {
+            dbStatus = 'reachable';
+            connection.end();
+          })
+          .catch(err => {
+            console.error('Database connection error:', err);
+          });
+
+
+        res.send(`BFF is healthy. DB status: ${dbStatus}`);
       });
 
       app.listen(port, () => console.log(`BFF running on port ${port}`));
@@ -27,11 +40,14 @@ write_files:
         "version": "1.0.0",
         "main": "app.js",
         "dependencies": {
-          "express": "^4.18.2"
+          "express": "^4.18.2",
+          "mysql2": "^3.2.0"
         }
       }
 
 runcmd:
+  - export BLOB_CONNECTION_STRING=<set your blob connection string>
+  - export DB_IP=<set your database IP address>
   - mkdir -p /home/azureuser/bff-app
   - cd /home/azureuser/bff-app
   - npm install
