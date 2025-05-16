@@ -10,6 +10,7 @@ write_files:
       const express = require('express');
       const app = express();
       const port = process.env.PORT || 3001;
+      const BFF_URL = process.env.BFF_URL || 'http://localhost:3000';
 
       app.get('/', (req, res) => {
         res.send('Frontend is running');
@@ -23,7 +24,8 @@ write_files:
         "version": "1.0.0",
         "main": "app.js",
         "dependencies": {
-          "express": "^4.18.2"
+          "express": "^4.18.2",
+          "axios": "^1.6.0"
         },
         "scripts": {
           "start": "node app.js"
@@ -31,6 +33,7 @@ write_files:
       }
 
 runcmd:
+  - export BFF_URL=http://<update with BFF_IP>:3000
   - mkdir -p /home/azureuser/frontend-app
   - cd /home/azureuser/frontend-app
   - npm install
